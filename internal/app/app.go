@@ -8,12 +8,14 @@ import (
 	tender_storage "avito_tenders/internal/services/tender/storage"
 	"log"
 	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func SetupRoutes(database *db.Database) *gin.Engine {
 	r := gin.Default()
+	r.Use(CORSMiddleware())
 
 	tenderStorage := tender_storage.New(database)
 	tenderHandler := tender_handlers.New(tenderStorage)
@@ -21,14 +23,13 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 	bidsStorage := bids_storage.New(database)
 	bidsHandler := bids_handlers.New(bidsStorage)
 
-	
-
 	r.POST("/api/tenders/new", tenderHandler.CreateTender())
-
-
 
 	r.POST("/api/bids/new", bidsHandler.CreateBids())
 
+	r.GET("/api/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
 	return r
 }
@@ -44,11 +45,24 @@ func Start_Server() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-
 	r := SetupRoutes(database)
 	serverAddress := os.Getenv("SERVER_ADDRESS")
 	if err := r.Run(serverAddress); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
 
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+			return
+		}
+		c.Next()
+	}
 }
