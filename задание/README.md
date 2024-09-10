@@ -44,8 +44,10 @@ CREATE TABLE employee (
 );
 ```
 
-Организация (Organization):
+Организация (O
+rganization):
 ```sql
+добавить попозже
 CREATE TYPE organization_type AS ENUM (
     'IE',
     'LLC',
