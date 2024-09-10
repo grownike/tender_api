@@ -10,11 +10,7 @@ import (
 
 func (h *handler) CreateTender() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// data := c.Request.Body
-		// if err != nil {
-		// 	c.JSON(500, gin.H{"error1": err.Error()})
-		// 	return
-		// }
+		
 		tender := models.Tender{}
 
 		jsonDataBytes, err := io.ReadAll(c.Request.Body)

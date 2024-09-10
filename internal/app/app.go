@@ -21,20 +21,19 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 	bidsStorage := bids_storage.New(database)
 	bidsHandler := bids_handlers.New(bidsStorage)
 
-	// Маршруты для предложений (tender)
+	
 
 	r.POST("/api/tenders/new", tenderHandler.CreateTender())
 
-	// Маршруты для предложений (bids)
+
 
 	r.POST("/api/bids/new", bidsHandler.CreateBids())
-	// r.GET("/api/bids/my", bidService.GetMyBids)
+
 
 	return r
 }
 
 func Start_Server() {
-	// Загружаем переменные окружения
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
@@ -45,10 +44,8 @@ func Start_Server() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// Инициализация маршрутов
-	r := SetupRoutes(database)
 
-	// Запуск HTTP сервера
+	r := SetupRoutes(database)
 	serverAddress := os.Getenv("SERVER_ADDRESS")
 	if err := r.Run(serverAddress); err != nil {
 		log.Fatalf("Error starting server: %v", err)
