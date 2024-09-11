@@ -40,8 +40,6 @@ func (s *storage) GetMyTenders(username string) *gorm.DB {
 	return query
 }
 
-
-
 func (s *storage) UpdateTender(c *gin.Context, tenderId uuid.UUID, updates map[string]interface{}, username string) (*models.Tender, error) {
 	var tender models.Tender
 	if err := s.Database.DB.First(&tender, tenderId).Error; err != nil {
@@ -79,7 +77,7 @@ func (s *storage) GetTenderById(tenderId uuid.UUID) (*models.Tender, error) {
 		}
 		return nil, err
 	}
-	
+
 	return &tender, nil
 }
 
@@ -140,13 +138,20 @@ func (s *storage) RollbackTender(tenderId uuid.UUID, version models.TenderVersio
 		return errors.New("tender not found")
 	}
 
+	tenderVersion := models.TenderVersion{
+		TenderID:    tender.ID,
+		Name:        tender.Name,
+		Description: tender.Description,
+		ServiceType: tender.ServiceType,
+		Version:     tender.Version,
+	}
+	s.Database.DB.Create(&tenderVersion)
+
 	updates := map[string]interface{}{
-		"name":        version.Name,
-		"description": version.Description,
+		"name":         version.Name,
+		"description":  version.Description,
 		"service_type": version.ServiceType,
-		"version":     tender.Version + 1,
+		"version":      tender.Version + 1,
 	}
 	return s.Database.DB.Model(&models.Tender{}).Where("id = ?", tenderId).Updates(updates).Error
 }
-
-
