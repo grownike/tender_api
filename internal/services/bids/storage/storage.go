@@ -58,3 +58,8 @@ func (s *storage) CreateBid(c *gin.Context, bid *models.Bid) error {
 	}
 	return nil
 }
+
+func (s *storage) GetMyBids(username string) *gorm.DB {
+	query := s.Database.DB.Where("creator_username = ?", username).Order("name ASC")
+	return query
+}

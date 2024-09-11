@@ -37,7 +37,9 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 	r.PATCH("/api/tenders/:tenderId/edit", tenderHandler.EditTender())
 
 	r.POST("/api/bids/new", bidsHandler.CreateBids())
-	
+
+	r.GET("/api/bids/my", bidsHandler.GetMyBids())
+
 	return r
 }
 
