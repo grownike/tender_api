@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,6 +18,10 @@ type Employee struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 }
 
+func (Employee) TableName() string {
+	return "employee"
+}
+
 type Organization struct {
 	gorm.Model
 	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
@@ -27,17 +32,38 @@ type Organization struct {
 	UpdatedAt   time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 }
 
+func (Organization) TableName() string {
+	return "organization"
+}
+
 type Tender struct {
 	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name            string    `gorm:"not null" json:"name"`
 	Description     string    `json:"description"`
-	ServiceType     string    `gorm:"not null" json:"serviceType"`
+	ServiceType     string    `gorm:"not null;column:service_type" json:"serviceType"`
 	Status          string    `gorm:"default:CREATED" json:"status"`
-	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"` 
-	CreatorUsername string    `gorm:"not null" json:"creatorUsername"` 
+	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`
+	CreatorUsername string    `gorm:"not null" json:"creatorUsername"`
 	Version         int       `gorm:"default:1" json:"version"`
 	CreatedAt       time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt       time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
+}
+
+func (Tender) TableName() string {
+	return "tender"
+}
+
+func (t *Tender) Validate() error {
+	if t.Name == "" {
+		return fmt.Errorf("field 'name' is required")
+	}
+	if t.ServiceType == "" {
+		return fmt.Errorf("field 'serviceType' is required")
+	}
+	if t.CreatorUsername == "" {
+		return fmt.Errorf("field 'creatorUsername' is required")
+	}
+	return nil
 }
 
 type Bid struct {
@@ -53,6 +79,10 @@ type Bid struct {
 	UpdatedAt       time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 }
 
+func (Bid) TableName() string {
+	return "bid"
+}
+
 type Review struct {
 	ID               uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Content          string    `gorm:"not null" json:"content"`
@@ -61,8 +91,16 @@ type Review struct {
 	CreatedAt        time.Time `gorm:"autoCreateTime" json:"createdAt"`
 }
 
+func (Review) TableName() string {
+	return "review"
+}
+
 type Responsible struct {
 	ID             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	OrganizationID uint      `gorm:"not null" json:"organizationId"`
-	UserID         uint      `gorm:"not null" json:"userId"`
+	OrganizationID uuid.UUID `gorm:"type:uuid;not null" json:"organizationId"`
+	UserID         uuid.UUID `gorm:"type:uuid;not null" json:"userId"`
+}
+
+func (Responsible) TableName() string {
+	return "organization_responsible"
 }

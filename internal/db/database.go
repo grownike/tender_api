@@ -4,7 +4,6 @@ import (
 	"avito_tenders/internal/models"
 	"log"
 	"os"
-
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -31,16 +30,37 @@ func InitDB() (*Database, error) {
 		return nil, errDB
 	}
 
+	if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
+		log.Fatalf("Error creating extension uuid-ossp: %v", err)
+	}
+
+	err = createEnumType(db)
+	if err != nil {
+		log.Fatalf("Failed to create enum type: %v", err)
+	}
+
 	err = db.AutoMigrate(&models.Employee{}, &models.Organization{}, &models.Tender{})
 	if err != nil {
 		return nil, err
 	}
 
-	if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
-		log.Fatalf("Error creating extension uuid-ossp: %v", err)
-	}
-
 	log.Println("Database connected and migrations applied successfully")
 	return &Database{DB: db}, nil
 
+}
+
+func createEnumType(db *gorm.DB) error {
+	query := `
+    DO $$ 
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'organization_type') THEN
+            CREATE TYPE organization_type AS ENUM (
+                'IE',
+                'LLC',
+                'JSC'
+            );
+        END IF;
+    END $$;
+    `
+	return db.Exec(query).Error
 }
