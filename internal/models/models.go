@@ -28,21 +28,19 @@ type Organization struct {
 }
 
 type Tender struct {
-	gorm.Model
 	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name            string    `gorm:"not null" json:"name"`
 	Description     string    `json:"description"`
-	ServiceType     string    `json:"service_type"`
+	ServiceType     string    `gorm:"not null" json:"serviceType"` //исправил json тег
 	Status          string    `gorm:"default:CREATED" json:"status"`
-	OrganizationID  uint      `gorm:"not null" json:"organization_id"`
-	CreatorUsername string    `gorm:"not null" json:"creator_username"`
+	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`  //исправил json тег
+	CreatorUsername string    `gorm:"not null" json:"creatorUsername"` //исправил json тег
 	Version         int       `gorm:"default:1" json:"version"`
 	CreatedAt       time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt       time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
 
 type Bid struct {
-	gorm.Model
 	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name            string    `gorm:"not null" json:"name"`
 	Description     string    `json:"description"`
@@ -56,7 +54,6 @@ type Bid struct {
 }
 
 type Review struct {
-	gorm.Model
 	ID               uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Content          string    `gorm:"not null" json:"content"`
 	BidID            uint      `gorm:"not null" json:"bid_id"`
@@ -65,7 +62,6 @@ type Review struct {
 }
 
 type Responsible struct {
-	gorm.Model
 	ID             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	OrganizationID uint      `gorm:"not null" json:"organization_id"`
 	UserID         uint      `gorm:"not null" json:"user_id"`
