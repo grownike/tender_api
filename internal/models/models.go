@@ -8,6 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
+const AUTOR_USER = "User"
+const AUTOR_ORGANIZATION = "Organization"
+
 type Employee struct {
 	gorm.Model
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
@@ -71,12 +74,27 @@ type Bid struct {
 	Name            string    `gorm:"not null" json:"name"`
 	Description     string    `json:"description"`
 	Status          string    `gorm:"default:CREATED" json:"status"`
-	TenderID        uint      `gorm:"not null" json:"tenderId"`
-	OrganizationID  uint      `gorm:"not null" json:"organizationId"`
+	TenderID        uuid.UUID `gorm:"not null;type:uuid" json:"tenderId"`
+	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`
 	CreatorUsername string    `gorm:"not null" json:"creatorUsername"`
+	AuthorType      string    `gorm:"not null" json:"authorType"`
 	Version         int       `gorm:"default:1" json:"version"`
+	AuthorId        uuid.UUID `gorm:"type:uuid" json:"authorId"`
 	CreatedAt       time.Time `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt       time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
+}
+
+func (b *Bid) Validate() error {
+	if b.Name == "" {
+		return fmt.Errorf("field 'name' is required")
+	}
+	if b.AuthorType != AUTOR_USER && b.AuthorType != AUTOR_ORGANIZATION {
+		return fmt.Errorf("field 'authorType' is required")
+	}
+	if b.AuthorType == AUTOR_USER && b.CreatorUsername == "" {
+		return fmt.Errorf("field 'creatorUsername' is required")
+	}
+	return nil
 }
 
 func (Bid) TableName() string {
@@ -105,15 +123,14 @@ func (Responsible) TableName() string {
 	return "organization_responsible"
 }
 
-
 type TenderVersion struct {
-	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	TenderID        uuid.UUID `gorm:"not null" json:"tenderId"`
-	Name            string    `json:"name"`
-	Description     string    `json:"description"`
-	ServiceType     string    `json:"serviceType"`
-	Version         int       `json:"version"`
-	CreatedAt       time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	TenderID    uuid.UUID `gorm:"not null" json:"tenderId"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	ServiceType string    `json:"serviceType"`
+	Version     int       `json:"version"`
+	CreatedAt   time.Time `gorm:"autoCreateTime" json:"createdAt"`
 }
 
 func (TenderVersion) TableName() string {
