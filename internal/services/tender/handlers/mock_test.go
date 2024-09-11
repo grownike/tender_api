@@ -80,6 +80,21 @@ func (mr *MockstorageMockRecorder) GetMyTenders(username interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMyTenders", reflect.TypeOf((*Mockstorage)(nil).GetMyTenders), username)
 }
 
+// GetTenderById mocks base method.
+func (m *Mockstorage) GetTenderById(tenderId uuid.UUID) (*models.Tender, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTenderById", tenderId)
+	ret0, _ := ret[0].(*models.Tender)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTenderById indicates an expected call of GetTenderById.
+func (mr *MockstorageMockRecorder) GetTenderById(tenderId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenderById", reflect.TypeOf((*Mockstorage)(nil).GetTenderById), tenderId)
+}
+
 // GetTenderStatus mocks base method.
 func (m *Mockstorage) GetTenderStatus(tenderId uuid.UUID, username string) (string, error) {
 	m.ctrl.T.Helper()
@@ -95,6 +110,20 @@ func (mr *MockstorageMockRecorder) GetTenderStatus(tenderId, username interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenderStatus", reflect.TypeOf((*Mockstorage)(nil).GetTenderStatus), tenderId, username)
 }
 
+// GetTenderVersion mocks base method.
+func (m *Mockstorage) GetTenderVersion(tenderId uuid.UUID, version int, tenderVersion *models.TenderVersion, username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTenderVersion", tenderId, version, tenderVersion, username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// GetTenderVersion indicates an expected call of GetTenderVersion.
+func (mr *MockstorageMockRecorder) GetTenderVersion(tenderId, version, tenderVersion, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenderVersion", reflect.TypeOf((*Mockstorage)(nil).GetTenderVersion), tenderId, version, tenderVersion, username)
+}
+
 // GetTenders mocks base method.
 func (m *Mockstorage) GetTenders(limit, offset int, serviceType []string) *gorm.DB {
 	m.ctrl.T.Helper()
@@ -107,6 +136,20 @@ func (m *Mockstorage) GetTenders(limit, offset int, serviceType []string) *gorm.
 func (mr *MockstorageMockRecorder) GetTenders(limit, offset, serviceType interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenders", reflect.TypeOf((*Mockstorage)(nil).GetTenders), limit, offset, serviceType)
+}
+
+// RollbackTender mocks base method.
+func (m *Mockstorage) RollbackTender(tenderId uuid.UUID, version models.TenderVersion) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RollbackTender", tenderId, version)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RollbackTender indicates an expected call of RollbackTender.
+func (mr *MockstorageMockRecorder) RollbackTender(tenderId, version interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackTender", reflect.TypeOf((*Mockstorage)(nil).RollbackTender), tenderId, version)
 }
 
 // UpdateTender mocks base method.

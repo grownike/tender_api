@@ -104,3 +104,18 @@ type Responsible struct {
 func (Responsible) TableName() string {
 	return "organization_responsible"
 }
+
+
+type TenderVersion struct {
+	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	TenderID        uuid.UUID `gorm:"not null" json:"tenderId"`
+	Name            string    `json:"name"`
+	Description     string    `json:"description"`
+	ServiceType     string    `json:"serviceType"`
+	Version         int       `json:"version"`
+	CreatedAt       time.Time `gorm:"autoCreateTime" json:"createdAt"`
+}
+
+func (TenderVersion) TableName() string {
+	return "tender_version"
+}

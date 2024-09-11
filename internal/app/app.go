@@ -8,6 +8,7 @@ import (
 	tender_storage "avito_tenders/internal/services/tender/storage"
 	"log"
 	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -31,6 +32,7 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 	r.POST("/api/tenders/new", tenderHandler.CreateTender())
 
 	r.PUT("/api/tenders/:tenderId/status", tenderHandler.EditTenderStatus())
+	r.PUT("/api/tenders/:tenderId/rollback/:version", tenderHandler.RollbackTender())
 
 	r.PATCH("/api/tenders/:tenderId/edit", tenderHandler.EditTender())
 
@@ -38,7 +40,6 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 
 	return r
 }
-
 
 func Start_Server() {
 	err := godotenv.Load()

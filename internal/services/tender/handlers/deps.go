@@ -17,5 +17,7 @@ type storage interface {
 	UpdateTender(c *gin.Context, tenderId uuid.UUID, updates map[string]interface{}, username string) (*models.Tender, error)
 	GetTenderStatus(tenderId uuid.UUID, username string) (string, error)
 	EditTenderStatus(tenderId uuid.UUID, username string, newStatus string) (*models.Tender, error)
-
+	GetTenderVersion(tenderId uuid.UUID, version int, tenderVersion *models.TenderVersion, username string) error
+	RollbackTender(tenderId uuid.UUID, version models.TenderVersion) error
+	GetTenderById(tenderId uuid.UUID) (*models.Tender, error)
 }

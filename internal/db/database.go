@@ -4,6 +4,7 @@ import (
 	"avito_tenders/internal/models"
 	"log"
 	"os"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -39,7 +40,7 @@ func InitDB() (*Database, error) {
 		log.Fatalf("Failed to create enum type: %v", err)
 	}
 
-	err = db.AutoMigrate(&models.Employee{}, &models.Organization{}, &models.Tender{})
+	err = db.AutoMigrate(&models.Employee{}, &models.Organization{}, &models.Tender{}, &models.TenderVersion{})
 	if err != nil {
 		return nil, err
 	}
