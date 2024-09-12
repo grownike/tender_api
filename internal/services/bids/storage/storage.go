@@ -144,13 +144,12 @@ func (s *storage) RollbackBid(bidId uuid.UUID, version models.BidVersion) error 
 	s.Database.DB.Create(&bidVersion)
 
 	updates := map[string]interface{}{
-		"name":         version.Name,
-		"description":  version.Description,
-		"version":      bid.Version + 1,
+		"name":        version.Name,
+		"description": version.Description,
+		"version":     bid.Version + 1,
 	}
 	return s.Database.DB.Model(&models.Bid{}).Where("id = ?", bidId).Updates(updates).Error
 }
-
 
 func (s *storage) GetBidById(bidId uuid.UUID) (*models.Bid, error) {
 	var bid models.Bid
@@ -177,7 +176,6 @@ func (s *storage) GetBidVersion(bidId uuid.UUID, version int, bidVersion *models
 
 	return s.Database.DB.Where("bid_id = ? AND version = ?", bidId, version).First(bidVersion).Error
 }
-
 
 func (s *storage) EditBidStatus(bidId uuid.UUID, username string, newStatus string) (*models.Bid, error) {
 	var bid models.Bid

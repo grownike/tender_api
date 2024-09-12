@@ -89,5 +89,4 @@ func CORSMiddleware() gin.HandlerFunc {
 
 func pingHandler(c *gin.Context) {
 	c.String(200, "ok")
-
 }
