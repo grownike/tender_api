@@ -41,18 +41,22 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 	//Предложение. Bids GET - POST - PUT - PATCH
 
 	r.GET("/api/bids/my", bidsHandler.GetMyBids())
-	r.GET("/api/bids/:tenderId/list", bidsHandler.GetBidsByTender())
+
+	r.GET("/api/bids/tender/:tenderId/list", bidsHandler.GetBidsByTender())
 	r.GET("/api/bids/:bidId/status", bidsHandler.GetBidStatus())
 
 	r.POST("/api/bids/new", bidsHandler.CreateBids())
 
 	r.PUT("/api/bids/:bidId/rollback/:version", bidsHandler.RollbackBid())
+	//error!
 	r.PUT("/api/bids/:bidId/status", bidsHandler.EditBidStatus())
 
 	r.PATCH("/api/bids/:bidId/edit", bidsHandler.EditBid())
 
 	return r
 }
+
+
 
 func Start_Server() {
 	err := godotenv.Load()
