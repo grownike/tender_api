@@ -136,3 +136,16 @@ type TenderVersion struct {
 func (TenderVersion) TableName() string {
 	return "tender_version"
 }
+
+type BidVersion struct {
+	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	BidID           uuid.UUID `gorm:"not null;type:uuid" json:"bidId"`
+	Name            string    `json:"name"`
+	Description     string    `json:"description"`
+	Version         int       `json:"version"`
+	CreatedAt       time.Time `gorm:"autoCreateTime" json:"createdAt"`
+}
+
+func (BidVersion) TableName() string {
+	return "bid_versions"
+}

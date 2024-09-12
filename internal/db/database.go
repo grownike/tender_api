@@ -40,7 +40,7 @@ func InitDB() (*Database, error) {
 		log.Fatalf("Failed to create enum type: %v", err)
 	}
 
-	err = db.AutoMigrate(&models.Employee{}, &models.Organization{}, &models.Tender{}, &models.TenderVersion{}, &models.Bid{}, &models.Responsible{}, &models.Review{})
+	err = db.AutoMigrate(&models.Employee{}, &models.Organization{}, &models.Tender{}, &models.TenderVersion{}, &models.Bid{}, &models.Responsible{}, &models.Review{}, &models.BidVersion{})
 	if err != nil {
 		return nil, err
 	}

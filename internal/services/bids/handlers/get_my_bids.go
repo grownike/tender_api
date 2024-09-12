@@ -22,7 +22,7 @@ func (h *handler) GetMyBids() gin.HandlerFunc {
 		query := h.storage.GetMyBids(username)
 
 		if err := query.Find(&bid).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve tenders"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bids"})
 			return
 		}
 

@@ -25,6 +25,8 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 	bidsStorage := bids_storage.New(database)
 	bidsHandler := bids_handlers.New(bidsStorage)
 
+	//Тендеры. Tenders GET - POST - PUT - PATCH
+
 	r.GET("/api/tenders", tenderHandler.GetTenders())
 	r.GET("/api/tenders/my", tenderHandler.GetMyTenders())
 	r.GET("/api/tenders/:tenderId/status", tenderHandler.GetTenderStatus())
@@ -36,9 +38,18 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 
 	r.PATCH("/api/tenders/:tenderId/edit", tenderHandler.EditTender())
 
-	r.POST("/api/bids/new", bidsHandler.CreateBids())
+	//Предложение. Bids GET - POST - PUT - PATCH
 
 	r.GET("/api/bids/my", bidsHandler.GetMyBids())
+	r.GET("/api/bids/:tenderId/list", bidsHandler.GetBidsByTender())
+	r.GET("/api/bids/:bidId/status", bidsHandler.GetBidStatus())
+
+	r.POST("/api/bids/new", bidsHandler.CreateBids())
+
+	r.PUT("/api/bids/:bidId/rollback/:version", bidsHandler.RollbackBid())
+	r.PUT("/api/bids/:bidId/status", bidsHandler.EditBidStatus())
+
+	r.PATCH("/api/bids/:bidId/edit", bidsHandler.EditBid())
 
 	return r
 }
@@ -78,5 +89,5 @@ func CORSMiddleware() gin.HandlerFunc {
 
 func pingHandler(c *gin.Context) {
 	c.String(200, "ok")
-	
+
 }
