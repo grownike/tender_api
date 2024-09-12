@@ -451,7 +451,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /bids/{tenderId}/list:
+  /bids/tender/{tenderId}/list:
     get:
       summary: Получение списка предложений для тендера
       description: Получение предложений, связанных с указанным тендером.
