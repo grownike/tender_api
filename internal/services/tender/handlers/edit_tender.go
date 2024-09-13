@@ -45,7 +45,7 @@ func (h *handler) EditTender() gin.HandlerFunc {
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				return
 			}
-			if err.Error() == "tender is not in CREATED status" {
+			if err.Error() == "tender is not in Created status" {
 				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 				return
 			}

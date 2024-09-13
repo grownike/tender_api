@@ -43,7 +43,7 @@ func (h *handler) EditBid() gin.HandlerFunc {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 				return
 			}
-			if err.Error() == "bid is not in CREATED status" {
+			if err.Error() == "bid is not in Created status" {
 				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 				return
 			}

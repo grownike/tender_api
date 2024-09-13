@@ -43,7 +43,7 @@ func (s *storage) CreateBid(c *gin.Context, bid *models.Bid) error {
 	if bid.AuthorType == models.AUTOR_USER {
 		var employee models.Employee
 
-		if err := s.Database.DB.Where("username = ?", tender.CreatorUsername).First(&employee).Error; err != nil {
+		if err := s.Database.DB.Where("username = ?", bid.CreatorUsername).First(&employee).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return errors.New("user not found")
 			}
@@ -51,7 +51,7 @@ func (s *storage) CreateBid(c *gin.Context, bid *models.Bid) error {
 		}
 
 		var responsible models.Responsible
-		if err := s.Database.DB.First(&responsible, "user_id = ?", bid.AuthorId).Error; err != nil {
+		if err := s.Database.DB.First(&responsible, "user_id = ?", employee.ID).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return errors.New("user is not responsible for any organization")
 			}
@@ -192,8 +192,8 @@ func (s *storage) UpdateBid(c *gin.Context, bidId uuid.UUID, updates map[string]
 		return nil, err
 	}
 
-	if bid.Status != "CREATED" {
-		return nil, errors.New("bid is not in CREATED status")
+	if bid.Status != "Created" {
+		return nil, errors.New("bid is not in Created status")
 	}
 
 	var responsible models.Responsible
@@ -208,11 +208,19 @@ func (s *storage) UpdateBid(c *gin.Context, bidId uuid.UUID, updates map[string]
 	}
 
 	bidVersion := models.BidVersion{
-		BidID:       bid.ID,
-		Name:        bid.Name,
-		Description: bid.Description,
-		Version:     bid.Version,
+		BidID:           bid.ID,
+		Name:            bid.Name,
+		Description:     bid.Description,
+		Status:          bid.Status,
+		TenderID:        bid.TenderID,
+		CreatorUsername: bid.CreatorUsername,
+		Version:         bid.Version,
+		AuthorId:        bid.AuthorId,
+		AuthorType:      bid.AuthorType,
+		CreatedAt:       bid.CreatedAt,
+		OrganizationID:  bid.OrganizationID,
 	}
+
 	s.Database.DB.Create(&bidVersion)
 
 	if err := s.Database.DB.Model(&bid).Updates(updates).Error; err != nil {
@@ -253,12 +261,12 @@ func (s *storage) RollbackBid(bidId uuid.UUID, version int, username string) (*m
 		return nil, err
 	}
 
-	if bid.Status != "CREATED" {
-		return nil, errors.New("bid is not in CREATED status")
+	if bid.Status != "Created" {
+		return nil, errors.New("bid is not in Created status")
 	}
 
 	var bidRollback models.BidVersion
-	if err := s.Database.DB.Where("tender_id = ? AND version = ?", bidId, version).First(&bidRollback).Error; err != nil {
+	if err := s.Database.DB.Where("bid_id = ? AND version = ?", bidId, version).First(&bidRollback).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("version not found")
 		}
@@ -283,25 +291,24 @@ func (s *storage) RollbackBid(bidId uuid.UUID, version int, username string) (*m
 	s.Database.DB.Create(&bidVersion)
 
 	updates := map[string]interface{}{
-		"name":            bidRollback.Name,
-		"description":     bidRollback.Description,
-		"status":          bidRollback.Status,
+		"name":             bidRollback.Name,
+		"description":      bidRollback.Description,
+		"status":           bidRollback.Status,
 		"tender_id":        bidRollback.TenderID,
 		"creator_username": bidRollback.CreatorUsername,
-		"version":         bid.Version + 1,
+		"version":          bid.Version + 1,
 		"author_id":        bidRollback.AuthorId,
 		"author_type":      bidRollback.AuthorType,
 		"created_at":       bidRollback.CreatedAt,
 		"organization_id":  bidRollback.OrganizationID,
 	}
 
-	if err := s.Database.DB.Model(&models.Tender{}).Where("id = ?", bidId).Updates(updates).Error; err != nil {
+	if err := s.Database.DB.Model(&models.Bid{}).Where("id = ?", bidId).Updates(updates).Error; err != nil {
 		return nil, err
 	}
 
 	return &bid, nil
 }
-
 
 func (s *storage) EditBidStatus(bidId uuid.UUID, username string, newStatus string) (*models.Bid, error) {
 	var bid models.Bid

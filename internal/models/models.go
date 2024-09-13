@@ -44,7 +44,7 @@ type Tender struct {
 	Name            string    `gorm:"not null" json:"name"`
 	Description     string    `json:"description"`
 	ServiceType     string    `gorm:"not null;column:service_type" json:"serviceType"`
-	Status          string    `gorm:"default:CREATED" json:"status"`
+	Status          string    `gorm:"default:Created" json:"status"`
 	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`
 	CreatorUsername string    `gorm:"not null" json:"creatorUsername"`
 	Version         int       `gorm:"default:1" json:"version"`
@@ -66,6 +66,11 @@ func (t *Tender) Validate() error {
 	if t.CreatorUsername == "" {
 		return fmt.Errorf("field 'creatorUsername' is required")
 	}
+
+	if t.OrganizationID == uuid.Nil {
+		return fmt.Errorf("field 'organizationId' must be a valid UUID")
+	}
+
 	return nil
 }
 
@@ -73,7 +78,7 @@ type Bid struct {
 	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name            string    `gorm:"not null" json:"name"`
 	Description     string    `json:"description"`
-	Status          string    `gorm:"default:CREATED" json:"status"`
+	Status          string    `gorm:"default:Created" json:"status"`
 	TenderID        uuid.UUID `gorm:"not null;type:uuid" json:"tenderId"`
 	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`
 	CreatorUsername string    `gorm:"not null" json:"creatorUsername"`
@@ -130,7 +135,7 @@ type TenderVersion struct {
 	Description     string    `json:"description"`
 	ServiceType     string    `json:"serviceType"`
 	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`
-	Status          string    `gorm:"default:CREATED" json:"status"`
+	Status          string    `gorm:"default:Created" json:"status"`
 	Version         int       `json:"version"`
 	CreatorUsername string    `gorm:"not null" json:"creatorUsername"`
 	CreatedAt       time.Time `gorm:"autoCreateTime" json:"createdAt"`
@@ -150,7 +155,7 @@ type BidVersion struct {
 	CreatorUsername string    `gorm:"not null" json:"creatorUsername"`
 	AuthorId        uuid.UUID `gorm:"type:uuid" json:"authorId"`
 	AuthorType      string    `gorm:"not null" json:"authorType"`
-	Status          string    `gorm:"default:CREATED" json:"status"`
+	Status          string    `gorm:"default:Created" json:"status"`
 	TenderID        uuid.UUID `gorm:"not null;type:uuid" json:"tenderId"`
 	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`
 }
