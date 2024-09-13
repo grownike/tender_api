@@ -124,13 +124,16 @@ func (Responsible) TableName() string {
 }
 
 type TenderVersion struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
-	TenderID    uuid.UUID `gorm:"not null" json:"tenderId"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	ServiceType string    `json:"serviceType"`
-	Version     int       `json:"version"`
-	CreatedAt   time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	TenderID        uuid.UUID `gorm:"not null" json:"tenderId"`
+	Name            string    `json:"name"`
+	Description     string    `json:"description"`
+	ServiceType     string    `json:"serviceType"`
+	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`
+	Status          string    `gorm:"default:CREATED" json:"status"`
+	Version         int       `json:"version"`
+	CreatorUsername string    `gorm:"not null" json:"creatorUsername"`
+	CreatedAt       time.Time `gorm:"autoCreateTime" json:"createdAt"`
 }
 
 func (TenderVersion) TableName() string {
@@ -144,6 +147,12 @@ type BidVersion struct {
 	Description     string    `json:"description"`
 	Version         int       `json:"version"`
 	CreatedAt       time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	CreatorUsername string    `gorm:"not null" json:"creatorUsername"`
+	AuthorId        uuid.UUID `gorm:"type:uuid" json:"authorId"`
+	AuthorType      string    `gorm:"not null" json:"authorType"`
+	Status          string    `gorm:"default:CREATED" json:"status"`
+	TenderID        uuid.UUID `gorm:"not null;type:uuid" json:"tenderId"`
+	OrganizationID  uuid.UUID `gorm:"not null" json:"organizationId"`
 }
 
 func (BidVersion) TableName() string {

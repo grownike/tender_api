@@ -60,6 +60,8 @@ func (s *storage) CreateTender(c *gin.Context, tender *models.Tender) error {
 // ready
 func (s *storage) GetTenders(limit, offset int, serviceType []string) *gorm.DB {
 	query := s.Database.DB.Limit(limit).Offset(offset).Order("name ASC")
+	query = query.Where("status = ?", "PUBLISHED")
+
 	if len(serviceType) > 0 {
 		query = query.Where("service_type IN ?", serviceType)
 	}
@@ -105,13 +107,17 @@ func (s *storage) UpdateTender(c *gin.Context, tenderId uuid.UUID, updates map[s
 		return nil, err
 	}
 
+	if tender.Status != "CREATED" {
+		return nil, errors.New("tender is not in CREATED status")
+	}
+
 	var responsible models.Responsible
 
 	if err := s.Database.DB.
 		Where("organization_id = ? AND user_id = ?", tender.OrganizationID, employee.ID).
 		First(&responsible).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("unauthorized: user is not responsible for this organization")
+			return nil, errors.New("unauthorized: user is not responsible for tender's organization")
 		}
 		return nil, err
 	}
@@ -132,7 +138,6 @@ func (s *storage) UpdateTender(c *gin.Context, tenderId uuid.UUID, updates map[s
 
 	return &tender, nil
 }
-
 
 // ready
 func (s *storage) GetTenderStatus(tenderId uuid.UUID, username string) (string, error) {
@@ -205,7 +210,7 @@ func (s *storage) EditTenderStatus(tenderId uuid.UUID, username string, newStatu
 	return &tender, nil
 }
 
-//ready
+// ready
 func (s *storage) RollbackTender(tenderId uuid.UUID, version int, username string) (*models.Tender, error) {
 
 	var tender models.Tender
@@ -218,7 +223,6 @@ func (s *storage) RollbackTender(tenderId uuid.UUID, version int, username strin
 		}
 		return nil, err
 	}
-
 
 	if err := s.Database.DB.First(&tender, tenderId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -236,32 +240,44 @@ func (s *storage) RollbackTender(tenderId uuid.UUID, version int, username strin
 		return nil, err
 	}
 
+	if tender.Status != "CREATED" {
+		return nil, errors.New("tender is not in CREATED status")
+	}
+
 	var tenderRollback models.TenderVersion
 	if err := s.Database.DB.Where("tender_id = ? AND version = ?", tenderId, version).First(&tenderRollback).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("version not found")
 		}
 		return nil, err
-		
+
 	}
 
 	tenderVersion := models.TenderVersion{
-		TenderID:    tender.ID,
-		Name:        tender.Name,
-		Description: tender.Description,
-		ServiceType: tender.ServiceType,
-		Version:     tender.Version,
+		TenderID:        tenderId,
+		Name:            tender.Name,
+		Description:     tender.Description,
+		ServiceType:     tender.Description,
+		Status:          tender.Status,
+		OrganizationID:  tender.OrganizationID,
+		CreatorUsername: tender.CreatorUsername,
+		Version:         tender.Version,
+		CreatedAt:       tender.CreatedAt,
 	}
 
 	s.Database.DB.Create(&tenderVersion)
 
 	updates := map[string]interface{}{
-		"name":         tenderRollback.Name,
-		"description":  tenderRollback.Description,
-		"service_type": tenderRollback.ServiceType,
-		"version":      tender.Version + 1,
+		"name":            tenderRollback.Name,
+		"description":     tenderRollback.Description,
+		"service_type":     tenderRollback.Description,
+		"status":          tenderRollback.Status,
+		"organization_id":  tenderRollback.OrganizationID,
+		"creator_username": tenderRollback.CreatorUsername,
+		"version":         tender.Version + 1,
+		"created_at":       tenderRollback.CreatedAt,
 	}
-	if err:= s.Database.DB.Model(&models.Tender{}).Where("id = ?", tenderId).Updates(updates).Error; err !=nil{
+	if err := s.Database.DB.Model(&models.Tender{}).Where("id = ?", tenderId).Updates(updates).Error; err != nil {
 		return nil, err
 	}
 

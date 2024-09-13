@@ -50,6 +50,10 @@ func (h *handler) RollbackTender() gin.HandlerFunc {
 				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 				return
 			}
+			if err.Error() == "tender is not in CREATED status" {
+				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+				return
+			}
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to rollback tender"})
 			return
 		}

@@ -3,6 +3,7 @@ package handlers
 import (
 	"avito_tenders/internal/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,6 +11,8 @@ import (
 func (h *handler) GetMyBids() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
+		limitParam := c.DefaultQuery("limit", "5")
+		offsetParam := c.DefaultQuery("offset", "0")
 		username := c.Query("username")
 
 		if username == "" {
@@ -17,15 +20,29 @@ func (h *handler) GetMyBids() gin.HandlerFunc {
 			return
 		}
 
-		var bid []models.Bid
+		limit, err := strconv.Atoi(limitParam)
+		if err != nil || limit <= 0 {
+			limit = 5
+		}
 
-		query := h.storage.GetMyBids(username)
+		offset, err := strconv.Atoi(offsetParam)
+		if err != nil || offset < 0 {
+			offset = 0
+		}
+		
+		var bids []models.Bid
 
-		if err := query.Find(&bid).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bids"})
+		bids, err = h.storage.GetMyBids(username, limit, offset)
+		
+		if err != nil {
+			if err.Error() == "user not found" {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusOK, bid)
+		c.JSON(http.StatusOK, bids)
 	}
 }

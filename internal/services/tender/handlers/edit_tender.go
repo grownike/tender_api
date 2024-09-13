@@ -37,14 +37,17 @@ func (h *handler) EditTender() gin.HandlerFunc {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 				return
 			}
-			if err.Error() == "unauthorized: user is not responsible for this organization" {
+			if err.Error() == "unauthorized: user is not responsible for tender's organization" {
 				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 				return
 			}
 			if err.Error() == "tender not found" {
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				return
-
+			}
+			if err.Error() == "tender is not in CREATED status" {
+				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+				return
 			}
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update tender"})
 			return
@@ -55,7 +58,7 @@ func (h *handler) EditTender() gin.HandlerFunc {
 }
 
 //Я столкнулся с тем, что при передачи в json "serviceType" у меня почему-то он так и остаётся.
-//В create_tendeer всё работает как надо. Пока что я решил проблему через такой костыль...
+//В create_tender всё работает как надо. Пока что я решил проблему через такой костыль...
 
 func convertKeys(updates map[string]interface{}) map[string]interface{} {
 	converted := make(map[string]interface{})

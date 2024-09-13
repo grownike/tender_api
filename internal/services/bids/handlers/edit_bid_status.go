@@ -40,14 +40,18 @@ func (h *handler) EditBidStatus() gin.HandlerFunc {
 
 		updatedBid, err := h.storage.EditBidStatus(bidId, username, newStatus)
         if err != nil {
-            if err.Error() == "unauthorized: you are not the creator of this bid" {
-                c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+            if err.Error() == "unauthorized: user is not responsible for this bid's organization" {
+                c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
                 return
             }
             if err.Error() == "bid not found" {
                 c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
                 return
             }
+			if err.Error() == "user not found"{
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+                return
+			}
             c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update bid status"})
             return
         }

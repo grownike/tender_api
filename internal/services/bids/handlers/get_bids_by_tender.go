@@ -40,11 +40,24 @@ func (h *handler) GetBidsByTender() gin.HandlerFunc {
 
 		bids, err := h.storage.GetBidsByTender(c, tenderId, username, limit, offset)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"reason": "Failed to fetch bids"})
+			if err.Error() == "tender not found" {
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "user not found" {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "unauthorized: user in not responsible of this tender's bids" {
+				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
 		if len(bids) == 0 {
-			c.JSON(http.StatusNotFound, gin.H{"reason": "No bids found"})
+			c.JSON(http.StatusNotFound, gin.H{"reason": "no bids found"})
 			return
 		}
 

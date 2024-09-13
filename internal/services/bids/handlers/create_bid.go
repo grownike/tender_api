@@ -2,8 +2,7 @@ package handlers
 
 import (
 	"avito_tenders/internal/models"
-	"encoding/json"
-	"io"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,28 +12,41 @@ func (h *handler) CreateBids() gin.HandlerFunc {
 
 		bid := models.Bid{}
 
-		jsonDataBytes, err := io.ReadAll(c.Request.Body)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
-
-		err = json.Unmarshal(jsonDataBytes, &bid)
-		if err != nil {
-			c.JSON(500, gin.H{"error Unmarshal": err.Error()})
-			return
-		}
+		if err := c.ShouldBindJSON(&bid); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
 
 		if err := bid.Validate(); err != nil {
-			c.JSON(400, gin.H{"Bad validation": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		
-		err = h.storage.CreateBid(c, &bid)
-		if err != nil {
-			c.JSON(500, gin.H{"error": "failed to create bid"})
+		if err := h.storage.CreateBid(c, &bid); err!= nil{
+			if err.Error() == "user not found"{
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "organization not found"{
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "user is not responsible for any organization"{
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "user is responsible for organization that not found"{
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "tender not found"{
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(200, gin.H{"status": "ok"})
+		
+		c.JSON(http.StatusOK, bid)
 	}
 }

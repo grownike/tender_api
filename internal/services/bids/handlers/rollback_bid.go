@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"avito_tenders/internal/models"
 	"net/http"
 	"strconv"
 
@@ -32,24 +31,25 @@ func (h *handler) RollbackBid() gin.HandlerFunc {
 			return
 		}
 
-		var bidVersion models.BidVersion
-		if err := h.storage.GetBidVersion(bidId, version, &bidVersion, username); err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Version not found"})
-			return
-		}
-
-		if err := h.storage.RollbackBid(bidId, bidVersion); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to rollback bid"})
-			return
-		}
-		bid, err := h.storage.GetBidById(bidId)
+		bid,err := h.storage.RollbackBid(bidId, version, username)
 		if err != nil {
-			if err.Error() == "bid not found" {
+			if err.Error() == "bid not found"{
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				return
-
 			}
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid version"})
+			if err.Error() == "version not found"{
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "user not found" {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "unauthorized: user is not responsible for this bid's organization" {
+				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to rollback bid"})
 			return
 		}
 
