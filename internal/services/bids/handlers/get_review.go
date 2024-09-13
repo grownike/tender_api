@@ -18,7 +18,6 @@ func (h *handler) GetReviewsByTender() gin.HandlerFunc {
 			return
 		}
 
-		// Optional pagination parameters
 		limitParam := c.DefaultQuery("limit", "5")
 		offsetParam := c.DefaultQuery("offset", "0")
 		authorUsername := c.Query("authorUsername")
@@ -46,7 +45,6 @@ func (h *handler) GetReviewsByTender() gin.HandlerFunc {
 			return
 		}
 
-		// Call storage function to retrieve reviews
 		reviews, err := h.storage.GetReviewsByTender(tenderId, limit, offset, authorUsername, requesterUsername)
 		if err != nil {
 			if err.Error() == "unauthorized: requester is not responsible for tender's organization" {

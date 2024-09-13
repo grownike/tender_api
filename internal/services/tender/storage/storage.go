@@ -143,7 +143,7 @@ func (s *storage) UpdateTender(c *gin.Context, tenderId uuid.UUID, updates map[s
 	return &tender, nil
 }
 
-// ready work
+
 func (s *storage) GetTenderStatus(tenderId uuid.UUID, username string) (string, error) {
 	var tender models.Tender
 	var employee models.Employee
