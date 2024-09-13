@@ -109,7 +109,7 @@ func (Bid) TableName() string {
 type Review struct {
 	ID               uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Content          string    `gorm:"not null" json:"content"`
-	BidID            uint      `gorm:"not null" json:"bidId"`
+	BidID            uuid.UUID `gorm:"type:uuid;not null" json:"bidId"`
 	ReviewerUsername string    `gorm:"not null" json:"reviewerUsername"`
 	CreatedAt        time.Time `gorm:"autoCreateTime" json:"createdAt"`
 }

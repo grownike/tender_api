@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	
 )
 
 type storage interface {
@@ -16,4 +15,5 @@ type storage interface {
 	UpdateBid(c *gin.Context, bidId uuid.UUID, updates map[string]interface{}, username string) (*models.Bid, error)
 	RollbackBid(bidId uuid.UUID, version int, username string) (*models.Bid, error)
 	EditBidStatus(bidId uuid.UUID, username string, newStatus string) (*models.Bid, error)
+	GetReviewsByTender(tenderId uuid.UUID, limit int, offset int, authorUsername string, requesterUsername string) ([]models.Review, error)
 }

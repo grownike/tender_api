@@ -346,3 +346,53 @@ func (s *storage) EditBidStatus(bidId uuid.UUID, username string, newStatus stri
 
 	return &bid, nil
 }
+
+func (s *storage) GetReviewsByTender(tenderId uuid.UUID, limit int, offset int, authorUsername string, requesterUsername string) ([]models.Review, error) {
+	var reviews []models.Review
+	var author models.Employee
+	var requester models.Employee
+	var tender models.Tender
+	var responsible models.Responsible
+
+	if err := s.Database.DB.Where("username = ?", authorUsername).First(&author).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("author not found")
+		}
+		return nil, err
+	}
+
+	if err := s.Database.DB.Where("username = ?", requesterUsername).First(&requester).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("requester not found")
+		}
+		return nil, err
+	}
+
+	if err := s.Database.DB.First(&tender, tenderId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("tender not found")
+		}
+		return nil, err
+	}
+
+	if err := s.Database.DB.
+		Where("organization_id = ? AND user_id = ?", tender.OrganizationID, requester.ID).
+		First(&responsible).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("unauthorized: requester is not responsible for tender's organization")
+		}
+		return nil, err
+	}
+
+	err := s.Database.DB.
+		Where("bid_id IN (SELECT id FROM bid WHERE tender_id = ? AND creator_username = ?)", tenderId, authorUsername).
+		Limit(limit).
+		Offset(offset).
+		Find(&reviews).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return reviews, nil
+}
