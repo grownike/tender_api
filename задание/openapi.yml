@@ -821,7 +821,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /bids/{tenderId}/reviews:
+  /bids/reviews/{tenderId}:
     get:
       summary: Просмотр отзывов на прошлые предложения
       description: Ответственный за организацию может посмотреть прошлые отзывы на предложения автора, который создал предложение для его тендера.
