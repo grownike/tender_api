@@ -17,7 +17,7 @@ func (h *handler) EditTenderStatus() gin.HandlerFunc {
 		username := c.Query("username")
 		newStatus := c.Query("status")
 
-
+	
 		if username == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
 			return

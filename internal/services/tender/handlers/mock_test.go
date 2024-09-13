@@ -67,32 +67,18 @@ func (mr *MockstorageMockRecorder) EditTenderStatus(tenderId, username, newStatu
 }
 
 // GetMyTenders mocks base method.
-func (m *Mockstorage) GetMyTenders(username string) *gorm.DB {
+func (m *Mockstorage) GetMyTenders(username string, limit, offset int) ([]models.Tender, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMyTenders", username)
-	ret0, _ := ret[0].(*gorm.DB)
-	return ret0
-}
-
-// GetMyTenders indicates an expected call of GetMyTenders.
-func (mr *MockstorageMockRecorder) GetMyTenders(username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMyTenders", reflect.TypeOf((*Mockstorage)(nil).GetMyTenders), username)
-}
-
-// GetTenderById mocks base method.
-func (m *Mockstorage) GetTenderById(tenderId uuid.UUID) (*models.Tender, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTenderById", tenderId)
-	ret0, _ := ret[0].(*models.Tender)
+	ret := m.ctrl.Call(m, "GetMyTenders", username, limit, offset)
+	ret0, _ := ret[0].([]models.Tender)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetTenderById indicates an expected call of GetTenderById.
-func (mr *MockstorageMockRecorder) GetTenderById(tenderId interface{}) *gomock.Call {
+// GetMyTenders indicates an expected call of GetMyTenders.
+func (mr *MockstorageMockRecorder) GetMyTenders(username, limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenderById", reflect.TypeOf((*Mockstorage)(nil).GetTenderById), tenderId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMyTenders", reflect.TypeOf((*Mockstorage)(nil).GetMyTenders), username, limit, offset)
 }
 
 // GetTenderStatus mocks base method.
@@ -110,20 +96,6 @@ func (mr *MockstorageMockRecorder) GetTenderStatus(tenderId, username interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenderStatus", reflect.TypeOf((*Mockstorage)(nil).GetTenderStatus), tenderId, username)
 }
 
-// GetTenderVersion mocks base method.
-func (m *Mockstorage) GetTenderVersion(tenderId uuid.UUID, version int, tenderVersion *models.TenderVersion, username string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTenderVersion", tenderId, version, tenderVersion, username)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// GetTenderVersion indicates an expected call of GetTenderVersion.
-func (mr *MockstorageMockRecorder) GetTenderVersion(tenderId, version, tenderVersion, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenderVersion", reflect.TypeOf((*Mockstorage)(nil).GetTenderVersion), tenderId, version, tenderVersion, username)
-}
-
 // GetTenders mocks base method.
 func (m *Mockstorage) GetTenders(limit, offset int, serviceType []string) *gorm.DB {
 	m.ctrl.T.Helper()
@@ -139,17 +111,18 @@ func (mr *MockstorageMockRecorder) GetTenders(limit, offset, serviceType interfa
 }
 
 // RollbackTender mocks base method.
-func (m *Mockstorage) RollbackTender(tenderId uuid.UUID, version models.TenderVersion) error {
+func (m *Mockstorage) RollbackTender(tenderId uuid.UUID, version int, username string) (*models.Tender, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RollbackTender", tenderId, version)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "RollbackTender", tenderId, version, username)
+	ret0, _ := ret[0].(*models.Tender)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // RollbackTender indicates an expected call of RollbackTender.
-func (mr *MockstorageMockRecorder) RollbackTender(tenderId, version interface{}) *gomock.Call {
+func (mr *MockstorageMockRecorder) RollbackTender(tenderId, version, username interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackTender", reflect.TypeOf((*Mockstorage)(nil).RollbackTender), tenderId, version)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RollbackTender", reflect.TypeOf((*Mockstorage)(nil).RollbackTender), tenderId, version, username)
 }
 
 // UpdateTender mocks base method.

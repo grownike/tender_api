@@ -13,7 +13,6 @@ func (h *handler) GetTenderStatus() gin.HandlerFunc {
 		tenderIdParam := c.Param("tenderId")
 		username := c.Query("username")
 
-		print(username)
 
 		if username == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
@@ -26,17 +25,19 @@ func (h *handler) GetTenderStatus() gin.HandlerFunc {
 			return
 		}
 
-
 		status, err := h.storage.GetTenderStatus(tenderId, username)
 		if err != nil {
-			if err.Error() == "unauthorized: you are not the creator of this tender" {
+			if err.Error() == "user not found"{
 				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "unauthorized: you are not responsible for this organization's tenders" {
+				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 				return
 			}
 			if err.Error() == "tender not found" {
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				return
-
 			}
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get tender status"})
 			return

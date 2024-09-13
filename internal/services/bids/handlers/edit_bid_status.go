@@ -16,6 +16,7 @@ func (h *handler) EditBidStatus() gin.HandlerFunc {
 		bidIdParam := c.Param("tenderId")
 		username := c.Query("username")
 		newStatus := c.Query("status")
+		
 
 
 		if username == "" {

@@ -2,9 +2,7 @@ package handlers
 
 import (
 	"avito_tenders/internal/models"
-	"encoding/json"
-	"io"
-
+	"net/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,28 +11,34 @@ func (h *handler) CreateTender() gin.HandlerFunc {
 
 		tender := models.Tender{}
 
-		jsonDataBytes, err := io.ReadAll(c.Request.Body)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
-			return
-		}
-
-		err = json.Unmarshal(jsonDataBytes, &tender)
-		if err != nil {
-			c.JSON(500, gin.H{"error Unmarshal": err.Error()})
-			return
-		}
+		if err := c.ShouldBindJSON(&tender); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
 
 		if err := tender.Validate(); err != nil {
-			c.JSON(400, gin.H{"Bad validation": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		
-		err = h.storage.CreateTender(c, &tender)
+		err := h.storage.CreateTender(c, &tender)
 		if err != nil {
-			c.JSON(500, gin.H{"error": "failed to create tender"})
+			if err.Error() == "user not found"{
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "organization not found" {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "user is not responsible for this organization" {
+				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(200, gin.H{"status": "ok"})
+		
+		c.JSON(http.StatusOK, "ok")
 	}
 }

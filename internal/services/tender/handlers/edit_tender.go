@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,11 +9,9 @@ import (
 
 func (h *handler) EditTender() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Получаем ID тендера из параметров URL
+
 		tenderIdParam := c.Param("tenderId")
 		username := c.Query("username")
-
-		print(username)
 
 		if username == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
@@ -24,31 +20,25 @@ func (h *handler) EditTender() gin.HandlerFunc {
 
 		tenderId, err := uuid.Parse(tenderIdParam)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tender ID"})
-			return
-		}
-
-
-		jsonDataBytes, err := io.ReadAll(c.Request.Body)
-		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid tender ID"})
 			return
 		}
 
 		var updates map[string]interface{}
 
-		err = json.Unmarshal(jsonDataBytes, &updates)
-		if err != nil {
-			c.JSON(500, gin.H{"error Unmarshal": err.Error()})
-			return
+		if err := c.ShouldBindJSON(&updates); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
-
 		updates = convertKeys(updates)
 
 		updatedTender, err := h.storage.UpdateTender(c, tenderId, updates, username)
 		if err != nil {
-			if err.Error() == "unauthorized: you are not the creator of this tender" {
+			if err.Error() == "user not found" {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "unauthorized: user is not responsible for this organization" {
+				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 				return
 			}
 			if err.Error() == "tender not found" {
@@ -64,9 +54,9 @@ func (h *handler) EditTender() gin.HandlerFunc {
 	}
 }
 
-
 //Я столкнулся с тем, что при передачи в json "serviceType" у меня почему-то он так и остаётся.
 //В create_tendeer всё работает как надо. Пока что я решил проблему через такой костыль...
+
 func convertKeys(updates map[string]interface{}) map[string]interface{} {
 	converted := make(map[string]interface{})
 	for key, value := range updates {

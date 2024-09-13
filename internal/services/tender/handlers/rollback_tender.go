@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"avito_tenders/internal/models"
 	"net/http"
 	"strconv"
 
@@ -32,24 +31,26 @@ func (h *handler) RollbackTender() gin.HandlerFunc {
 			return
 		}
 
-		var tenderVersion models.TenderVersion
-		if err := h.storage.GetTenderVersion(tenderId, version, &tenderVersion, username); err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Version not found"})
-			return
-		}
-
-		if err := h.storage.RollbackTender(tenderId, tenderVersion); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to rollback tender"})
-			return
-		}
-		tender, err := h.storage.GetTenderById(tenderId)
+	
+		tender,err := h.storage.RollbackTender(tenderId, version, username)
 		if err != nil {
-			if err.Error() == "tender not found" {
+			if err.Error() == "tender not found"{
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				return
-
 			}
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid version"})
+			if err.Error() == "version not found"{
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "user not found" {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+			if err.Error() == "unauthorized: user is not responsible for this organization" {
+				c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to rollback tender"})
 			return
 		}
 

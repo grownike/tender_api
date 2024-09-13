@@ -1,5 +1,6 @@
 package handlers
 
+
 import (
 	"avito_tenders/internal/models"
 	"net/http"
@@ -8,12 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
+
 func (h *handler) GetTenders() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		limitParam := c.DefaultQuery("limit", "5")
 		offsetParam := c.DefaultQuery("offset", "0")
 		serviceType := c.QueryArray("service_type")
+
 
 		limit, err := strconv.Atoi(limitParam)
 		if err != nil || limit <= 0 {
