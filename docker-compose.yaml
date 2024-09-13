@@ -3,13 +3,15 @@ services:
     image: postgres:latest
     restart: always
     environment:
-      POSTGRES_DB: "test_db"
+      POSTGRES_DB: "avito"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "admin"
     ports:
       - "5432:5432"
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d test_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d avito"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,6 +22,6 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      POSTGRES_CONN: "postgres://postgres:admin@postgres:5432/test_db?sslmode=disable"
+      POSTGRES_CONN: "postgres://postgres:admin@postgres:5432/avito?sslmode=disable"
     ports:
       - "8080:8080"
