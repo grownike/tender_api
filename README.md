@@ -5,6 +5,13 @@ docker-compose down -v
 docker-compose up
 ```
 
+## Запускт тестов
+
+```
+go test -v ./internal/app/...
+```
+
+
 ## Мой комментарий
 
 1. Нет тестов (create_tender_test - зачатки, но я не могу назвать это хорошими тестами).

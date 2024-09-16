@@ -6,6 +6,8 @@ import (
 	bids_storage "avito_tenders/internal/services/bids/storage"
 	tender_handlers "avito_tenders/internal/services/tender/handlers"
 	tender_storage "avito_tenders/internal/services/tender/storage"
+	etc_handlers "avito_tenders/internal/services/etc/handlers"
+	etc_storage "avito_tenders/internal/services/etc/storage"
 	"log"
 	"os"
 
@@ -22,8 +24,19 @@ func SetupRoutes(database *db.Database) *gin.Engine {
 	tenderStorage := tender_storage.New(database)
 	tenderHandler := tender_handlers.New(tenderStorage)
 
+	etcStorage := etc_storage.New(database)
+	etcHandler := etc_handlers.New(etcStorage)
+
 	bidsStorage := bids_storage.New(database)
 	bidsHandler := bids_handlers.New(bidsStorage)
+
+
+	//Прочее для тестов POST
+
+	
+	r.POST("/api/employees/new", etcHandler.CreateEmployee())
+	r.POST("/api/organizations/new", etcHandler.CreateCompany())
+	r.POST("/api/newAssign/:orgId/:user", etcHandler.AssignResponsible())
 
 	//Тендеры. Tenders GET - POST - PUT - PATCH
 

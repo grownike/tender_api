@@ -4,8 +4,6 @@ import (
 	"avito_tenders/internal/models"
 	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -20,10 +18,7 @@ func New(db *gorm.DB) *Database {
 
 func InitDB() (*Database, error) {
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	
 
 	dsn := os.Getenv("POSTGRES_CONN")
 	db, errDB := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -35,7 +30,7 @@ func InitDB() (*Database, error) {
 		log.Fatalf("Error creating extension uuid-ossp: %v", err)
 	}
 
-	err = createEnumType(db)
+	err := createEnumType(db)
 	if err != nil {
 		log.Fatalf("Failed to create enum type: %v", err)
 	}

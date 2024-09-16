@@ -39,6 +39,6 @@ func (h *handler) CreateTender() gin.HandlerFunc {
 			return
 		}
 		
-		c.JSON(http.StatusOK, "ok")
+		c.JSON(http.StatusOK, tender)
 	}
 }
