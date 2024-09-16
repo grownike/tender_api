@@ -59,38 +59,92 @@ func TestIntegrationCycle(t *testing.T) {
 
 	//Создание первого пользователя
 	username1 := "user1"
-	createUser(t, client, server.URL, username1, "User1FirstName", "User1LastName")
+	createUser_ApiRequest(t, client, server.URL, username1, "User1FirstName", "User1LastName")
 
 	//Создание первой компании
-	organizationID1 := createOrganization(t, client, server.URL, "Company A", "Description A", "LLC")
+	organizationID1 := createOrganization_ApiRequest(t, client, server.URL, "Company A", "Description A", "LLC")
 
 	//Назначение первого пользователя ответственным за первую компанию
-	assignResponsible(t, client, server.URL, organizationID1, username1)
+	assignResponsible_ApiRequest(t, client, server.URL, organizationID1, username1)
 
 	//Создание тендера от имени первой компании
-	tenderID := createTender(t, client, server.URL, organizationID1, username1, "Tender 1", "Description of Tender 1", "Service Type 1")
+	tenderID, status := createTender_ApiRequest(t, client, server.URL, organizationID1, username1, "Tender 1", "Description of Tender 1", "Service Type 1")
 
+    if status != 200{
+        t.Fatalf("Ожидался статус 200, получен %d", status)
+    }
 	//Создание второго пользователя
 	username2 := "user2"
-	createUser(t, client, server.URL, username2, "User2FirstName", "User2LastName")
+	createUser_ApiRequest(t, client, server.URL, username2, "User2FirstName", "User2LastName")
 
 	//Создание второй компании
-	organizationID2 := createOrganization(t, client, server.URL, "Company B", "Description B", "JSC")
+	organizationID2 := createOrganization_ApiRequest(t, client, server.URL, "Company B", "Description B", "JSC")
 
 	//Назначение второго пользователя ответственным за вторую компанию
-	assignResponsible(t, client, server.URL, organizationID2, username2)
+	assignResponsible_ApiRequest(t, client, server.URL, organizationID2, username2)
 
 	// println(organizationID2)
 
 	//Создание предложения на тендер от ответственного лица второй компании
-	createBid(t, client, server.URL, tenderID, organizationID2, "User", username2, "Bid 1", "Bid 1 Description")
+	createBid_ApiRequest(t, client, server.URL, tenderID, organizationID2, "User", username2, "Bid 1", "Bid 1 Description")
 
 	//Создание предложения на тендер от второй компании напрямую
-	createBid(t, client, server.URL, tenderID, organizationID2, "Organization", username2, "Bid 2", "Bid 2 Description")
+	createBid_ApiRequest(t, client, server.URL, tenderID, organizationID2, "Organization", username2, "Bid 2", "Bid 2 Description")
 
 }
 
-func createUser(t *testing.T, client *http.Client, baseURL, username, firstName, lastName string) {
+func TestIntegrationErrorTender(t *testing.T) {
+	router, database := setupTestApp()
+	defer teardownTestDB(database)
+
+	server := httptest.NewServer(router)
+	defer server.Close()
+
+	client := &http.Client{}
+
+	//Создание первого пользователя
+	username1 := "user1"
+	createUser_ApiRequest(t, client, server.URL, username1, "User1FirstName", "User1LastName")
+
+	//Создание первой компании
+	organizationID1 := createOrganization_ApiRequest(t, client, server.URL, "Company A", "Description A", "LLC")
+
+	
+
+	//Создание тендера от имени первой компании, но user1 не может это сделать!
+	_, status := createTender_ApiRequest(t, client, server.URL, organizationID1, username1, "Tender 1", "Description of Tender 1", "Service Type 1")
+
+    if status != 403{
+        t.Fatalf("Ожидался статус 403, получен %d", status)
+    }
+
+    //Назначение первого пользователя ответственным за первую компанию
+	assignResponsible_ApiRequest(t, client, server.URL, organizationID1, username1)
+
+    _, status = createTender_ApiRequest(t, client, server.URL, organizationID1, username1, "Tender 1", "Description of Tender 1", "Service Type 1")
+
+    if status != 200{
+        t.Fatalf("Ожидался статус 200, получен %d", status)
+    }
+
+    _, status = createTender_ApiRequest(t, client, server.URL, organizationID1, "blablabla", "Tender 1", "Description of Tender 1", "Service Type 1")
+
+    if status != 401{
+        t.Fatalf("Ожидался статус 401, получен %d", status)
+    }
+    
+    fakeOrgId := "83bbe121-02e7-410e-933f-15d8544ae07b"
+    _, status = createTender_ApiRequest(t, client, server.URL, fakeOrgId, username1, "Tender 1", "Description of Tender 1", "Service Type 1")
+
+    if status != 401{
+        t.Fatalf("Ожидался статус 401, получен %d", status)
+    }
+	
+}
+
+
+
+func createUser_ApiRequest(t *testing.T, client *http.Client, baseURL, username, firstName, lastName string) {
 	user := map[string]string{
 		"username":  username,
 		"firstName": firstName,
@@ -108,7 +162,7 @@ func createUser(t *testing.T, client *http.Client, baseURL, username, firstName,
 	}
 }
 
-func createOrganization(t *testing.T, client *http.Client, baseURL, name, description, orgType string) string {
+func createOrganization_ApiRequest(t *testing.T, client *http.Client, baseURL, name, description, orgType string) string {
 	org := map[string]string{
 		"name":        name,
 		"description": description,
@@ -132,7 +186,7 @@ func createOrganization(t *testing.T, client *http.Client, baseURL, name, descri
 	return result.ID
 }
 
-func assignResponsible(t *testing.T, client *http.Client, baseURL, organizationID, username string) {
+func assignResponsible_ApiRequest(t *testing.T, client *http.Client, baseURL, organizationID, username string) {
 	assignment := map[string]string{}
 	body, _ := json.Marshal(assignment)
 
@@ -147,7 +201,7 @@ func assignResponsible(t *testing.T, client *http.Client, baseURL, organizationI
 	}
 }
 
-func createTender(t *testing.T, client *http.Client, baseURL, organizationID, creatorUsername, name, description, serviceType string) string {
+func createTender_ApiRequest(t *testing.T, client *http.Client, baseURL, organizationID, creatorUsername, name, description, serviceType string) (string, int) {
 	tender := map[string]interface{}{
 		"name":            name,
 		"description":     description,
@@ -162,18 +216,15 @@ func createTender(t *testing.T, client *http.Client, baseURL, organizationID, cr
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("Ожидался статус 200, получен %d", resp.StatusCode)
-	}
-
 	var result struct {
 		ID string `json:"id"`
 	}
 	json.NewDecoder(resp.Body).Decode(&result)
-	return result.ID
+
+	return result.ID, resp.StatusCode
 }
 
-func createBid(t *testing.T, client *http.Client, baseURL, tenderID, OrgId, authorType, creatorUsername, name, description string) {
+func createBid_ApiRequest(t *testing.T, client *http.Client, baseURL, tenderID, OrgId, authorType, creatorUsername, name, description string) {
 	bid := map[string]interface{}{
 		"name":            name,
 		"description":     description,
